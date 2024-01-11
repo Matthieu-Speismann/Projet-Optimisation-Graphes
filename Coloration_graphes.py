@@ -10,9 +10,12 @@ def normalisation(graph):
     Args:
         graph (Graph)
     """
+    nodes = list(graph.nodes)
+    print(nodes)
     for node in list(graph.nodes()):
-        G.remove_node(node)
-    sorted_nodes = sorted(list(graph.nodes()))
+        graph.remove_node(node)
+    sorted_nodes = sorted(nodes)
+    print(sorted_nodes)
     for node in sorted_nodes:
         graph.add_node(node)
     for (node1, node2) in edges:
