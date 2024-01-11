@@ -1,43 +1,103 @@
+""" 
+
+-
+Auteurs: Matthieu SPEISMANN, Théo GUELLA et Guillaume TRAN-RUESCHE
+"""
+
+# Modules: 
 import matplotlib.pyplot as plt
 import networkx as nx
 
-colors = ['b','g','r','c','m','y','k','w']
+# Variables globales:
+dispo_prof: list[list[int]] = [
+            [1, 0, 1, 0, 1],
+            [0, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [0, 1, 0, 1, 0],
+            [1, 1, 0, 0, 1],
+            [0, 0, 0, 1, 1]]
+"""Matrice binaire représentant les disponibilité des profs. 
+-
+    list[list[int]]: Profs et donc cours indicées en lignes et créneaux indicées en lignes.
+"""
+
+colors: list[str] = ['b','g','r','y','m','c','k','w']
+""" Cette liste permet d'obtenir une couleur (représentée par une chaine de caractères) à partir de son index
+    -
+"""
+
+colors_dict: dict[str, int] = {}
+""" Ce dictionnaire permet d'obtenir l'indice d'une couleur à partir de sa chaine de caractère.
+    -
+ """
+for i in range(len(colors)):
+    colors_dict[colors[i]] = i
+
 
 def normalisation(graph):
     """ Fonction pour normaliser le graph aux fonctions qu'on utilise.
     -
     Modifie le graph en place pour que les nodes soit triés dans son encodage.
+
     Args:
         graph (Graph)
     """
+
     nodes = list(graph.nodes)
-    print(nodes)
+    edges = list(graph.edges)
     for node in list(graph.nodes()):
         graph.remove_node(node)
     sorted_nodes = sorted(nodes)
-    print(sorted_nodes)
     for node in sorted_nodes:
         graph.add_node(node)
     for (node1, node2) in edges:
         graph.add_edge(node1, node2)
 
-def greedy_coloring(graph) -> list[str]:
-    """Algoritme glouton de coloration d'un graphe
-    -
-    Nous allons envisager tous les sommets successivement et attribuer 
-    à un sommet la plus petite couleur possible parmi celles déjà utilisées
-    (différente de celles de ses voisins s'ils sont déjà colorés) 
-    à ce sommet, ou bien une nouvelle couleur si toutes les couleurs 
-    sont utilisées par les voisins
     
+def trivial_coloring(graph) -> list[str]:
+    """Propose une coloration triviale.
+    -
+    A chaque noeud est associée une couleur différente. 
+
     Args:
         graph (Graph): Graphe non orienté [Networkx]
 
     Returns:
-        list[str]: Liste des couleurs pour chaque noeuds
+        list[str]: Liste des couleurs pour chaque noeuds.
     """
 
-    node_colors = []
+    node_colors: list[str] = []
+    for sommet in graph.nodes():
+        for index in range(len(colors)):
+            # Vérification que la couleur est différente de toutes les autres:
+            if colors[index] not in node_colors:
+                # Vérification que le prof est disponible:
+                try:
+                    if dispo_prof[sommet][index] == 1:
+                        node_colors.append(colors[index])
+                        break
+                # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
+                except IndexError:
+                    raise ValueError("Pas de solution avec cette méthode de résolution.")
+    return node_colors
+
+
+def greedy_coloring(graph) -> list[str]:
+    """Algoritme glouton de coloration d'un graphe
+    -
+    Nous allons envisager tous les sommets successivement et attribuer à un sommet la plus petite couleur possible parmi celles déjà utilisées
+    (différente de celles de ses voisins s'ils sont déjà colorés) à ce sommet, ou bien une nouvelle couleur si toutes les couleurs 
+    sont utilisées par les voisins.
+
+    Args:
+        graph (Graph): Graphe non orienté [Networkx]
+
+    Returns:
+        list[str]: Liste des couleurs pour chaque noeuds.
+    """
+
+    node_colors: list[str] = []
     # Parcours de tous les sommets du graphes:
     for sommet in graph.nodes():
         voisins = list(graph.neighbors(sommet)) # Voisins de ce sommets
@@ -47,23 +107,48 @@ def greedy_coloring(graph) -> list[str]:
             try:
                 # Ajouter la couleurs du voisins dans une liste
                 couleurs_voisins.append(node_colors[voisin])
-            except IndexError: 
+            except IndexError:
                 pass # Si la couleur n'est pas encore attribuée, ignorer
         # Pour toutes les couleurs définies:
         for color in colors:
             # Si la couleurs n'est pas parmi les voisins:
-            if color not in couleurs_voisins:  
-                node_colors.append(color) # Attribution de la couleur au sommet 
-                break
+            if color not in couleurs_voisins:
+                index = colors_dict[color]
+                # Vérification de la diponibilité du prof:
+                try:
+                    if dispo_prof[sommet][index] == 1:
+                        node_colors.append(colors[index])
+                        break
+                # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
+                except IndexError:
+                    raise ValueError("Pas de solution avec cette méthode de résolution.")
     return node_colors
     
-if "__main__" == __name__:    
-    # Tests:
 
-    edges = [(0,3),(1,4),(2,6),(5,3),(0,4),(1,4),(2,7),(2,5)]
-    G = nx.Graph(edges)
-    normalisation(G)
+if "__main__" == __name__:
+
+    # Tests:
     
+    import random as rd
+
+    # edges aléatoire:
+    n = len(dispo_prof) - 1
+    
+    rd_edges = []
+    for i in range(10):
+        a = rd.randint(0,n)
+        b = rd.randint(0,n)
+        while a == b:
+            b = rd.randint(0,n)
+        rd_edges.append((a,b))
+
+    # edges précisé:
+    edges = [(0,1), (0,2), (0,4), (1,3), (1,5), (3,6), (5,6), (2, 4), (4,3)]
+
+    # Graphe et application
+    G = nx.Graph(edges)
+
+    normalisation(G)
     node_colors = greedy_coloring(G)
 
     nx.draw(G, node_color = node_colors, with_labels = True)
