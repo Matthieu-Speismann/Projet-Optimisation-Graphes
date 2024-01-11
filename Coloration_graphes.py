@@ -3,8 +3,20 @@ import networkx as nx
 
 colors = ['b','g','r','c','m','y','k','w']
 
-def tri_edges(edges: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    return sorted(edges, key = lambda x: max(x))
+def normalisation(graph):
+    """ Fonction pour normaliser le graph aux fonctions qu'on utilise.
+    -
+    Modifie le graph en place pour que les nodes soit triés dans son encodage.
+    Args:
+        graph (Graph)
+    """
+    for node in list(graph.nodes()):
+        G.remove_node(node)
+    sorted_nodes = sorted(list(graph.nodes()))
+    for node in sorted_nodes:
+        graph.add_node(node)
+    for (node1, node2) in edges:
+        graph.add_edge(node1, node2)
 
 def greedy_coloring(graph) -> list[str]:
     """Algoritme glouton de coloration d'un graphe
@@ -41,14 +53,15 @@ def greedy_coloring(graph) -> list[str]:
                 node_colors.append(color) # Attribution de la couleur au sommet 
                 break
     return node_colors
-
-        
     
-# Tests: 
-edges = [(0,1),(0,3),(1,2),(2,4),(2,5),(2,6),(1,3),(1,7),(3,6),(4,7),(5,6),(6,7)]
-sorted_edges = tri_edges(edges)
-print(sorted_edges)
-G = nx.Graph(sorted_edges)
-node_colors = greedy_coloring(G)
-nx.draw(G, with_labels = True, node_color = node_colors)
-plt.show()
+if "__main__" == __name__:    
+    # Tests:
+
+    edges = [(0,3),(1,4),(2,6),(5,3),(0,4),(1,4),(2,7),(2,5)]
+    G = nx.Graph(edges)
+    normalisation(G)
+    
+    node_colors = greedy_coloring(G)
+
+    nx.draw(G, node_color = node_colors, with_labels = True)
+    plt.show()
