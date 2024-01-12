@@ -16,11 +16,17 @@ dispo_prof: list[list[int]] = [
             [1, 0, 0, 0, 1],
             [0, 1, 0, 1, 0],
             [1, 1, 0, 0, 1],
-            [0, 0, 0, 1, 1]]
+            [0, 0, 0, 1, 1],
+            [1, 0, 0, 1, 1]]
 """Matrice binaire représentant les disponibilité des profs. 
 -
     list[list[int]]: Profs et donc cours indicées en lignes et créneaux indicées en lignes.
 """
+
+nombre_classe: int = 2
+"""Entier représentant le nombre de classe disponible dans l'école.
+-
+Le nombre de cours ayant lieu sur un même créneau ne peut alors pas être supérieur à ce nombre."""
 
 colors: list[str] = ['b','g','r','y','m','c','k','w']
 """ Cette liste permet d'obtenir une couleur (représentée par une chaine de caractères) à partir de son index
@@ -82,6 +88,13 @@ def trivial_coloring(graph) -> list[str]:
                     raise ValueError("Pas de solution avec cette méthode de résolution.")
     return node_colors
 
+def nombre_cours_couleur(color: str, node_colors: list[str]) -> int:
+    """ """ 
+    res = 0
+    for elem in node_colors:
+        if elem == color:
+            res += 1
+    return res
 
 def greedy_coloring(graph) -> list[str]:
     """Algoritme glouton de coloration d'un graphe
@@ -117,8 +130,10 @@ def greedy_coloring(graph) -> list[str]:
                 # Vérification de la diponibilité du prof:
                 try:
                     if dispo_prof[sommet][index] == 1:
-                        node_colors.append(colors[index])
-                        break
+                        # Vérification de la condition sur le nombre de salles de classe:
+                        if nombre_cours_couleur(color, node_colors) < nombre_classe:
+                            node_colors.append(colors[index])
+                            break
                 # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
                 except IndexError:
                     raise ValueError("Pas de solution avec cette méthode de résolution.")
@@ -135,7 +150,7 @@ if "__main__" == __name__:
     n = len(dispo_prof) - 1
     
     rd_edges = []
-    for i in range(10):
+    for i in range(15):
         a = rd.randint(0,n)
         b = rd.randint(0,n)
         while a == b:
@@ -146,7 +161,7 @@ if "__main__" == __name__:
     edges = [(0,1), (0,2), (0,4), (1,3), (1,5), (3,6), (5,6), (2, 4), (4,3)]
 
     # Graphe et application
-    G = nx.Graph(edges)
+    G = nx.Graph(rd_edges)
 
     normalisation(G)
     node_colors = greedy_coloring(G)
