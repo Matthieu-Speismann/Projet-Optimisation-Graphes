@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 parametres = {
     'nbrEleves': 15, #int N: Nombre d'élèves dans l'école
     'nbrCours': 4, #int N: Nombre de cours disponibles
-    'duréeCours': 0.2, #float [0,1]: Probabilté avec laquelle un cours dure deux heures au lieu d'une
+    'duréeCours': 0.2, #float [0,1]: Probabilté avec laquelle un cours dure deux heures au lieu d'une heure
     'nbrProfs': 2, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
     'probaCoursEleves': 0.3 #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
 }
@@ -22,9 +22,9 @@ def LireNoms(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return [line.strip() for line in file]
     
-prenomsEleves = lire_prenoms("prenoms.txt")
-nomsProfs = lire_prenoms("noms.txt")
-nomsMatieres = LireMatieres("matieres.txt")
+prenomsEleves = lire_prenoms("Liste anonymisation\\prenoms.txt")
+nomsProfs = lire_prenoms("Liste anonymisation\\noms.txt")
+nomsMatieres = LireMatieres("Liste anonymisation\\matieres.txt")
 
 eleves = [rd.choice(prenomsEleves) for _ in range(parametres['nbrEleves'])]  
 cours = [rd.choice(nomsMatieres) for _ in range(parametres['nbrCours'])]
