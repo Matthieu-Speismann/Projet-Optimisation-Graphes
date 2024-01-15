@@ -1,15 +1,20 @@
 """ 
-
+Implémentation de méthodes pour appliquer des colorations propres à des graphes avec nos 
+contraintes supplémentaires.
 -
-Auteurs: Matthieu SPEISMANN, Théo GUELLA et Guillaume TRAN-RUESCHE
+Implementation of graph coloring methods taking into account our specific constraints.
+-
+Auteurs / Authors: Matthieu SPEISMANN, Théo GUELLA et Guillaume TRAN-RUESCHE
 """
 
 # Modules: 
 import matplotlib.pyplot as plt
 import networkx as nx
 
-# Variables globales:
-dispo_prof: list[list[int]] = [
+# Variables globales / Global variables:
+#  Celles-ci sont utile pour tester ici / Useful for tests here 
+# Dans le fichier principal, elle sont obtenues à partir des données / In the main file, the are deducted from data.
+availability_courses: list[list[int]] = [
             [1, 0, 1, 0, 1],
             [0, 1, 0, 1, 0],
             [1, 1, 1, 1, 1],
@@ -18,34 +23,45 @@ dispo_prof: list[list[int]] = [
             [1, 1, 0, 0, 1],
             [0, 0, 0, 1, 1],
             [1, 0, 0, 1, 1]]
-"""Matrice binaire représentant les disponibilité des profs. 
+"""Matrice binaire représentant les disponibilité des cours grâce à celles des profs. 
 -
-    list[list[int]]: Profs et donc cours indicées en lignes et créneaux indicées en lignes.
+    Binary matrix representing the disponibility of a course from the teacher's disponibility.
+-
+    list[list[int]]: Cours indicées en lignes et créneaux indicées en lignes / Courses indexed in ligns and time in columns.
 """
 
-nombre_classe: int = 2
+number_rooms: int = 2
 """Entier représentant le nombre de classe disponible dans l'école.
 -
-Le nombre de cours ayant lieu sur un même créneau ne peut alors pas être supérieur à ce nombre."""
+Integer representing the amount of rooms available.
+-
+Le nombre de cours ayant lieu sur un même créneau ne peut alors pas être supérieur à ce nombre.
+In consequences, the number of courses taking place at the same time cannot bea bove that number."""
 
 colors: list[str] = ['b','g','r','y','m','c','k','w']
 """ Cette liste permet d'obtenir une couleur (représentée par une chaine de caractères) à partir de son index
-    -
+
+    This list allows to get a color (represented by a string) thanks to its index.
 """
 
 colors_dict: dict[str, int] = {}
 """ Ce dictionnaire permet d'obtenir l'indice d'une couleur à partir de sa chaine de caractère.
-    -
+
+    This dictionnary allows to get the index of a color thanks to its string. 
  """
+# Construction du dictionnaire / Construction of the dictionnary:
 for i in range(len(colors)):
     colors_dict[colors[i]] = i
 
 
 def normalisation(graph):
-    """ Fonction pour normaliser le graph aux fonctions qu'on utilise.
+    """ Fonction pour normaliser le graphe aux fonctions qu'on utilise.
     -
+    Function to normalise the graph for the functions we are using.
+    - 
     Modifie le graph en place pour que les nodes soit triés dans son encodage.
-
+    
+    
     Args:
         graph (Graph)
     """
@@ -74,21 +90,21 @@ def trivial_coloring(graph) -> list[str]:
     """
 
     node_colors: list[str] = []
-    for sommet in graph.nodes():
+    for node in graph.nodes():
         for index in range(len(colors)):
             # Vérification que la couleur est différente de toutes les autres:
             if colors[index] not in node_colors:
                 # Vérification que le prof est disponible:
                 try:
-                    if dispo_prof[sommet][index] == 1:
+                    if availability_courses[node][index] == 1:
                         node_colors.append(colors[index])
                         break
                 # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
                 except IndexError:
-                    raise ValueError("Pas de solution avec cette méthode de résolution.")
+                    raise ValueError("No available solution with this method.")
     return node_colors
 
-def nombre_cours_couleur(color: str, node_colors: list[str]) -> int:
+def number_courses_color(color: str, node_colors: list[str]) -> int:
     """ """ 
     res = 0
     for elem in node_colors:
@@ -113,30 +129,30 @@ def greedy_coloring(graph) -> list[str]:
     node_colors: list[str] = []
     # Parcours de tous les sommets du graphes:
     for sommet in graph.nodes():
-        voisins = list(graph.neighbors(sommet)) # Voisins de ce sommets
-        couleurs_voisins = [] 
+        neighbors = list(graph.neighbors(sommet)) # Voisins de ce sommets
+        neighbors_colors = [] 
         # Parcours des voisins du sommet:
-        for voisin in voisins:
+        for neighbor in neighbors:
             try:
                 # Ajouter la couleurs du voisins dans une liste
-                couleurs_voisins.append(node_colors[voisin])
+                neighbors_colors.append(node_colors[neighbor])
             except IndexError:
                 pass # Si la couleur n'est pas encore attribuée, ignorer
         # Pour toutes les couleurs définies:
         for color in colors:
             # Si la couleurs n'est pas parmi les voisins:
-            if color not in couleurs_voisins:
+            if color not in neighbors_colors:
                 index = colors_dict[color]
                 # Vérification de la diponibilité du prof:
                 try:
-                    if dispo_prof[sommet][index] == 1:
+                    if availability_courses[sommet][index] == 1:
                         # Vérification de la condition sur le nombre de salles de classe:
-                        if nombre_cours_couleur(color, node_colors) < nombre_classe:
+                        if number_courses_color(color, node_colors) < number_rooms:
                             node_colors.append(colors[index])
                             break
                 # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
                 except IndexError:
-                    raise ValueError("Pas de solution avec cette méthode de résolution.")
+                    raise ValueError("No available solution with this method.")
     return node_colors
 
 def degree_order(graph):
@@ -167,31 +183,31 @@ def improved_greedy_coloring(graph) -> list[str]:
     node_colors: list[str] = []
     # Parcours de tous les sommets du graphes:
     nodes = degree_order(graph)
-    for sommet in nodes:
-        voisins = list(graph.neighbors(sommet)) # Voisins de ce sommets
-        couleurs_voisins = [] 
+    for node in nodes:
+        neighbors = list(graph.neighbors(node)) # Voisins de ce sommets
+        neighbors_colors = [] 
         # Parcours des voisins du sommet:
-        for voisin in voisins:
+        for neighbor in neighbors:
             try:
                 # Ajouter la couleurs du voisins dans une liste
-                couleurs_voisins.append(node_colors[voisin])
+                neighbors_colors.append(node_colors[neighbor])
             except IndexError:
                 pass # Si la couleur n'est pas encore attribuée, ignorer
         # Pour toutes les couleurs définies:
         for color in colors:
             # Si la couleurs n'est pas parmi les voisins:
-            if color not in couleurs_voisins:
+            if color not in neighbors_colors:
                 index = colors_dict[color]
                 # Vérification de la diponibilité du prof:
                 try:
-                    if dispo_prof[sommet][index] == 1:
+                    if availability_courses[node][index] == 1:
                         # Vérification de la condition sur le nombre de salles de classe:
-                        if nombre_cours_couleur(color, node_colors) < nombre_classe:
+                        if number_courses_color(color, node_colors) < number_rooms:
                             node_colors.append(colors[index])
                             break
                 # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
                 except IndexError:
-                    raise ValueError("Pas de solution avec cette méthode de résolution.")
+                    raise ValueError("No available solution with this method.")
     return node_colors
 
 
@@ -202,7 +218,7 @@ if "__main__" == __name__:
     import random as rd
 
     # edges aléatoire:
-    n = len(dispo_prof) - 1
+    n = len(availability_courses) - 1
     
     rd_edges = []
     for i in range(15):
