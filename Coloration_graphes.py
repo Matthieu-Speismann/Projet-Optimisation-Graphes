@@ -138,7 +138,62 @@ def greedy_coloring(graph) -> list[str]:
                 except IndexError:
                     raise ValueError("Pas de solution avec cette méthode de résolution.")
     return node_colors
+
+def degree_order(graph):
+    """ Retourne les nœuds triés par ordre décroissant de degré
+    - 
     
+    Args:
+        graph (Graphe): Graphe Networkx 
+
+    Returns:
+        list[int]: _description_
+    """
+
+    return sorted(graph.nodes(), key=lambda x: graph.degree[x], reverse=True)
+
+def improved_greedy_coloring(graph) -> list[str]:
+    """Algoritme glouton de coloration d'un graphe
+    -
+    Similaire à l'algorithme glouton, mais les noeuds sont cette fois parcourus par ordre décroissant de leur arité.
+
+    Args:
+        graph (Graph): Graphe non orienté [Networkx]
+
+    Returns:
+        list[str]: Liste des couleurs pour chaque noeuds.
+    """
+
+    node_colors: list[str] = []
+    # Parcours de tous les sommets du graphes:
+    nodes = degree_order(graph)
+    for sommet in nodes:
+        voisins = list(graph.neighbors(sommet)) # Voisins de ce sommets
+        couleurs_voisins = [] 
+        # Parcours des voisins du sommet:
+        for voisin in voisins:
+            try:
+                # Ajouter la couleurs du voisins dans une liste
+                couleurs_voisins.append(node_colors[voisin])
+            except IndexError:
+                pass # Si la couleur n'est pas encore attribuée, ignorer
+        # Pour toutes les couleurs définies:
+        for color in colors:
+            # Si la couleurs n'est pas parmi les voisins:
+            if color not in couleurs_voisins:
+                index = colors_dict[color]
+                # Vérification de la diponibilité du prof:
+                try:
+                    if dispo_prof[sommet][index] == 1:
+                        # Vérification de la condition sur le nombre de salles de classe:
+                        if nombre_cours_couleur(color, node_colors) < nombre_classe:
+                            node_colors.append(colors[index])
+                            break
+                # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
+                except IndexError:
+                    raise ValueError("Pas de solution avec cette méthode de résolution.")
+    return node_colors
+
 
 if "__main__" == __name__:
 
@@ -164,7 +219,16 @@ if "__main__" == __name__:
     G = nx.Graph(rd_edges)
 
     normalisation(G)
-    node_colors = greedy_coloring(G)
+    
+    node_colors1 = greedy_coloring(G)
+    node_colors2 = improved_greedy_coloring(G)
 
-    nx.draw(G, node_color = node_colors, with_labels = True)
+    plt.figure(1)
+    nx.draw(G, node_color = node_colors1, with_labels = True)
+    plt.title("Greedy Coloring")
+    
+    plt.figure(2)
+    nx.draw(G, node_color = node_colors2, with_labels = True)
+    plt.title("Improved Greedy Coloring")
+    
     plt.show()
