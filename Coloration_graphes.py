@@ -10,29 +10,10 @@ Auteurs / Authors: Matthieu SPEISMANN, Théo GUELLA et Guillaume TRAN-RUESCHE
 # Modules: 
 import matplotlib.pyplot as plt
 import networkx as nx
+import matplotlib.colors as mcolors
 
 # Variables globales / Global variables:
-# Celles-ci sont utile pour tester ici / Useful for tests here 
-# Dans le fichier principal, elle sont obtenues à partir des données / In the main file, the are deducted from data.
 
-availability_courses: list[list[int]] = [
-            [1, 0, 1, 0, 1],
-            [0, 1, 0, 1, 0],
-            [1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 1],
-            [0, 1, 0, 1, 0],
-            [1, 1, 0, 0, 1],
-            [0, 0, 0, 1, 1],
-            [1, 0, 0, 1, 1]]
-"""Matrice binaire représentant les disponibilité des cours grâce à celles des profs. 
--
-    Binary matrix representing the disponibility of a course from the teacher's disponibility.
--
-    list[list[int]]: Cours indicées en lignes et créneaux indicées en lignes / Courses indexed in ligns and time in columns.
-"""
-
-
-number_rooms: int = 2
 """Entier représentant le nombre de classe disponible dans l'école.
 -
 Integer representing the amount of rooms available.
@@ -41,7 +22,8 @@ Le nombre de cours ayant lieu sur un même créneau ne peut alors pas être sup�
 In consequences, the number of courses taking place at the same time cannot bea bove that number."""
 
 
-colors: list[str] = ['b','g','r','y','m','c','k','w']
+colors: list[str] = ['blue','green','red','yellow','orange', 'deeppink', 'cyan', 'crimson', 'darkviolet', 'lime',
+                     'darkgrey', 'navy', 'lightcoral', 'seagreen', 'mediumturquoise']
 """ Cette liste permet d'obtenir une couleur (représentée par une chaine de caractères) à partir de son index
 
     This list allows to get a color (represented by a string) thanks to its index.
@@ -80,7 +62,7 @@ def normalisation(graph):
         graph.add_edge(node1, node2)
 
 
-def trivial_coloring(graph) -> list[str]:
+def trivial_coloring(graph, availability_courses: list[list[int]]) -> list[str]:
     """ Propose une coloration triviale.
     -
     Get a trivial coloration.
@@ -89,6 +71,8 @@ def trivial_coloring(graph) -> list[str]:
 
     Args:
         - graph (Graph): Graphe non orienté [Networkx] / Unoriented graph [Networkx]
+        - availability_courses: list[list[int]]: Matrice binaire représentant les disponibilités des cours. Cours indicées en lignes et créneaux indicées en lignes /
+                                                Binary Matrix representing the courses availability. Courses indexed in ligns and time in columns.
 
     Returns:
         - list[str]: Liste des couleurs pour chaque noeuds./ List of the color for each node. 
@@ -132,7 +116,7 @@ def number_courses_color(color: str, node_colors: list[str]) -> int:
     return res
 
 
-def greedy_coloring(graph) -> list[str]:
+def greedy_coloring(graph, availability_courses: list[list[int]], number_rooms: int) -> list[str]:
     """Algoritme glouton de coloration d'un graphe
     -
     Graph coloration greedy algorithm
@@ -145,7 +129,10 @@ def greedy_coloring(graph) -> list[str]:
     to its node or a new color if they are all already used by its neighbors.
 
     Args:
-        graph (Graph): Graphe non orienté [Networkx]
+        - graph (Graph): Graphe non orienté [Networkx] / Unoriented graph [Networkx]
+        - availability_courses: list[list[int]]: Matrice binaire représentant les disponibilités des cours. Cours indicées en lignes et créneaux indicées en lignes /
+                                                Binary Matrix representing the courses availability. Courses indexed in ligns and time in columns.
+        
 
     Returns:
         list[str]: Liste des couleurs pour chaque noeuds.
@@ -174,6 +161,8 @@ def greedy_coloring(graph) -> list[str]:
                         if number_courses_color(color, node_colors) < number_rooms:
                             node_colors.append(colors[index])
                             break
+                        else: pass
+                    else: pass
                 # Si l'erreur a lieu, cela signifie qu'il n'y a pas assez de couleur (et donc de créneaux) pour avoir une solution acceptable.
                 # If the error take place, it means that there is not enough colors (and so times) to construct an available solution:
                 except IndexError:
@@ -194,13 +183,15 @@ def degree_order(graph):
 
     return sorted(graph.nodes(), key=lambda x: graph.degree[x], reverse=True)
 
-def improved_greedy_coloring(graph) -> list[str]:
+def improved_greedy_coloring(graph, availability_courses: list[list[int]], number_rooms: int) -> list[str]:
     """Algoritme glouton de coloration d'un graphe
     -
     Similaire à l'algorithme glouton, mais les noeuds sont cette fois parcourus par ordre décroissant de leur arité.
 
     Args:
-        graph (Graph): Graphe non orienté [Networkx]
+        - graph (Graph): Graphe non orienté [Networkx] / Unoriented graph [Networkx]
+        - availability_courses: list[list[int]]: Matrice binaire représentant les disponibilités des cours. Cours indicées en lignes et créneaux indicées en lignes /
+                                                Binary Matrix representing the courses availability. Courses indexed in ligns and time in columns.
 
     Returns:
         list[str]: Liste des couleurs pour chaque noeuds.
@@ -235,42 +226,3 @@ def improved_greedy_coloring(graph) -> list[str]:
                 except IndexError:
                     raise ValueError("No available solution with this method.")
     return node_colors
-
-
-if "__main__" == __name__:
-
-    # Tests:
-    
-    import random as rd
-
-    # edges aléatoire:
-    n = len(availability_courses) - 1
-    
-    rd_edges = []
-    for i in range(15):
-        a = rd.randint(0,n)
-        b = rd.randint(0,n)
-        while a == b:
-            b = rd.randint(0,n)
-        rd_edges.append((a,b))
-
-    # edges précisé:
-    edges = [(0,1), (0,2), (0,4), (1,3), (1,5), (3,6), (5,6), (2, 4), (4,3)]
-
-    # Graphe et application
-    G = nx.Graph(rd_edges)
-
-    normalisation(G)
-    
-    node_colors1 = greedy_coloring(G)
-    node_colors2 = improved_greedy_coloring(G)
-
-    plt.figure(1)
-    nx.draw(G, node_color = node_colors1, with_labels = True)
-    plt.title("Greedy Coloring")
-    
-    plt.figure(2)
-    nx.draw(G, node_color = node_colors2, with_labels = True)
-    plt.title("Improved Greedy Coloring")
-    
-    plt.show()

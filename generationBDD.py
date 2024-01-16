@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 parameters = {
-    'studentNumber': 30, #int N: Nombre d'élèves dans l'école
+    'studentNumber': 40, #int N: Nombre d'élèves dans l'école
     'courseNumber': 10, #int N: Nombre de cours disponibles
-    'courseDuration': 0.2, #float [0,1]: Probabilté avec laquelle un cours dure deux heures au lieu d'une heure
     'profsNumber': 6, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
     'courseStudentProbability': 0.3, #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
-    'availableDays': 5, #int N: Number of days available for the schedule
-    'availabilityProbability': 0.35
+    'availableDays': 15, #int N: Number of days available for the schedule
+    'availabilityProbability': 1
 }
 
 
@@ -24,7 +23,6 @@ def ProfsAvailability(profsNumber, availableDays, availabilityProbability):
     Function: (int, int, float) -> (array)
     Returns:
         Matrix of availability, professors as rows and days as columns, with 1 if the professors is available
-    
     """
     matrice = np.random.choice([0, 1], size=(profsNumber, availableDays), p=[1 - availabilityProbability, availabilityProbability])
     return matrice
@@ -106,9 +104,9 @@ def Generation(parameters):
     """
     availabilityMatrix = ProfsAvailability(parameters['profsNumber'], parameters['availableDays'], parameters['availabilityProbability'])
 
-    studentsNames = DocumentReader("Liste anonymisation\\prenoms.txt")
-    profsNames = DocumentReader("Liste anonymisation\\noms.txt")
-    subjectNames = DocumentReader("Liste anonymisation\\matieres.txt")
+    studentsNames = DocumentReader("Liste anonymisation/prenoms.txt")
+    profsNames = DocumentReader("Liste anonymisation/noms.txt")
+    subjectNames = DocumentReader("Liste anonymisation/matieres.txt")
 
     students = StudentsCreation(parameters['studentNumber'], studentsNames)
     profs = ProfsCreation(parameters['profsNumber'], profsNames)
@@ -141,5 +139,6 @@ pos.update((node, (2, index / len(courses))) for index, node in enumerate(course
 pos.update((node, (3, index / len(profs))) for index, node in enumerate(profs))  # Positionnement des profs à droite
 
 fig, ax = plt.subplots()
+
+plt.figure(1)
 nx.draw(G, pos, ax=ax, with_labels=True, font_color='black', node_color=['#77cad9' if G.nodes[node]['label'] == 'eleve' else '#64d16c' if G.nodes[node]['label'] == 'matiere' else '#f06573' for node in G.nodes], node_size=1000)
-plt.show()
