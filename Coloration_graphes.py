@@ -226,3 +226,42 @@ def improved_greedy_coloring(graph, availability_courses: list[list[int]], numbe
                 except IndexError:
                     raise ValueError("No available solution with this method.")
     return node_colors
+
+# Fonctions utiles d'analyse / Useful analysis functions: 
+
+def elem_different(L:list[any]) -> int:
+    """Renvoie le nombre d'élément différente dans une liste.
+    - 
+    Get the number of different elements in a list
+    -
+
+    Args:
+        L (list[any])
+
+    Returns:
+        int: Nombre d'éléments différent trouvé / Number of different elements found.
+    """
+    res = 0
+    unique_elements = []
+    for elem in L:
+        if elem not in unique_elements:
+            res += 1
+            unique_elements.append(elem)
+    return res
+
+def max_couleur(node_colors: list[str]) -> int:
+    """Renvoie l'indice de la dernière couleur utilisée.
+    -
+    Get the index of the last used color.
+    -
+
+    Args:
+        node_colors (list[str]): Liste des couleurs pour chaque noeud (en indice) / List of the color for each node (indexed)
+
+    Returns:
+        int: Indice de la dernière couleur / Index of the last color.
+    """
+    node_colors_indexes = []
+    for color in node_colors:
+        node_colors_indexes.append(colors_dict[color])
+    return max (node_colors_indexes)

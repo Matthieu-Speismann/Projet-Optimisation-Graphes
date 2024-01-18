@@ -2,7 +2,7 @@ import random as rd
 import networkx as nx
 import matplotlib.pyplot as plt
 from generationBDD import G, courses, profs, availabilityMatrix
-from Coloration_graphes import normalisation, greedy_coloring, trivial_coloring
+from Coloration_graphes import normalisation, greedy_coloring, trivial_coloring, elem_different, max_couleur
 
 n : int = len(courses)
 """Number of different courses. 
@@ -23,9 +23,6 @@ for classe in range(n):
         if nx.has_path(G, profs[prof], courses[classe]):
             availability_courses[classe] = list(availabilityMatrix[prof])
 
-print(availabilityMatrix)
-print(availability_courses)
-print(availability_courses[0][1])
 
 real_courses_names : dict = {}
 """Dictionnary with the corresponding names and indexs of the courses
@@ -43,9 +40,14 @@ for i in range(n):
             new_graph.add_edge(index_courses[i], index_courses[j])
 
 
+# Application des méthodes / Application of the methods :
+
 normalisation(new_graph)
 node_colors = greedy_coloring(new_graph, availability_courses, number_rooms = 5)
 new_graph = nx.relabel_nodes(new_graph, real_courses_names)
+
+
+# Génération des label du graphe affiché / Label generation for the printed graphe: 
 
 colorCoursesDict= {}
 for node, indexColor in zip(new_graph.nodes, node_colors):
@@ -53,7 +55,16 @@ for node, indexColor in zip(new_graph.nodes, node_colors):
         colorCoursesDict[indexColor].append(node)
     else:
         colorCoursesDict[indexColor] = [node]
-        
+
+
+# Analyse / Analysis :
+
+print("Nombre de couleur: " + str(elem_different(node_colors)))
+print("Dernière couleur utilisée: " + str(max_couleur(node_colors)))
+
+
+# Affichage des graphes / Drawing the graphs: 
+
 plt.figure(2)
 nx.draw(new_graph, node_color = node_colors, with_labels = True, node_size=1500)
 plt.show()
