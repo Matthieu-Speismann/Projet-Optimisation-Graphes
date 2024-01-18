@@ -47,6 +47,13 @@ normalisation(new_graph)
 node_colors = greedy_coloring(new_graph, availability_courses, number_rooms = 5)
 new_graph = nx.relabel_nodes(new_graph, real_courses_names)
 
+colorCoursesDict= {}
+for node, indexColor in zip(new_graph.nodes, node_colors):
+    if indexColor in colorCoursesDict:
+        colorCoursesDict[indexColor].append(node)
+    else:
+        colorCoursesDict[indexColor] = [node]
+        
 plt.figure(2)
 nx.draw(new_graph, node_color = node_colors, with_labels = True, node_size=1500)
 plt.show()

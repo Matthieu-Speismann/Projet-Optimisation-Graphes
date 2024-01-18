@@ -3,11 +3,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 parameters = {
     'studentNumber': 40, #int N: Nombre d'élèves dans l'école
-    'courseNumber': 10, #int N: Nombre de cours disponibles
-    'profsNumber': 6, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
-    'courseStudentProbability': 0.3, #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
+    'courseNumber': 15, #int N: Nombre de cours disponibles
+    'profsNumber': 20, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
+    'courseStudentProbability': 0.2, #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
     'availableDays': 15, #int N: Number of days available for the schedule
     'availabilityProbability': 1
 }
@@ -24,8 +25,8 @@ def ProfsAvailability(profsNumber, availableDays, availabilityProbability):
     Returns:
         Matrix of availability, professors as rows and days as columns, with 1 if the professors is available
     """
-    matrice = np.random.choice([0, 1], size=(profsNumber, availableDays), p=[1 - availabilityProbability, availabilityProbability])
-    return matrice
+    availabilityMatrix = np.random.choice([0, 1], size=(profsNumber, availableDays), p=[1 - availabilityProbability, availabilityProbability])
+    return availabilityMatrix
 
 
 def StudentsCreation(studentNumber, studentsNames):
@@ -126,19 +127,18 @@ availabilityMatrix, students, profs, courses, courseStudentEdges, courseProfEdge
 
 G = nx.Graph()
 
-G.add_nodes_from(students, bipartite=0, label='eleve')
-G.add_nodes_from(courses, bipartite=1, label='matiere')
-G.add_nodes_from(profs, bipartite=0, label='prof')
+G.add_nodes_from(students, bipartite=0, label='students')
+G.add_nodes_from(courses, bipartite=1, label='subjects')
+G.add_nodes_from(profs, bipartite=0, label='profs')
 
 G.add_edges_from(courseStudentEdges)
 G.add_edges_from(courseProfEdges)
 
 pos = dict()
-pos.update((node, (1, index / len(students))) for index, node in enumerate(students))  # Positionnement des élèves à gauche
-pos.update((node, (2, index / len(courses))) for index, node in enumerate(courses))  # Positionnement des cours au centre
-pos.update((node, (3, index / len(profs))) for index, node in enumerate(profs))  # Positionnement des profs à droite
+pos.update((node, (1, index / len(students))) for index, node in enumerate(students)) 
+pos.update((node, (2, index / len(courses))) for index, node in enumerate(courses)) 
+pos.update((node, (3, index / len(profs))) for index, node in enumerate(profs)) 
 
 fig, ax = plt.subplots()
-
 plt.figure(1)
 nx.draw(G, pos, ax=ax, with_labels=True, font_color='black', node_color=['#77cad9' if G.nodes[node]['label'] == 'eleve' else '#64d16c' if G.nodes[node]['label'] == 'matiere' else '#f06573' for node in G.nodes], node_size=1000)
