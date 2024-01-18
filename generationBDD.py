@@ -6,11 +6,11 @@ import numpy as np
 
 parameters = {
     'studentNumber': 40, #int N: Nombre d'élèves dans l'école
-    'courseNumber': 15, #int N: Nombre de cours disponibles
-    'profsNumber': 15, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
-    'courseStudentProbability': 0.2, #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
-    'slotsNumber': 15, #int N: Number of days available for the schedule
-    'availabilityProbability': 1
+    'courseNumber': 12, #int N: Nombre de cours disponibles
+    'profsNumber': 12, #int N: Nombre de professeurs dans l'école. nbrProfs < nbrCours. Un prof enseigne forcément un cours mais les cours sont répartis de manière aléatoire
+    'courseStudentProbability': 0.25, #float [0,1]: Probabilité de création d'un lien, entre un élève et un cours
+    'slotsNumber': 10, #int N: Number of days available for the schedule
+    'availabilityProbability': 0.9
 }
 
 

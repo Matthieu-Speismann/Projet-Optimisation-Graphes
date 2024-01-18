@@ -20,9 +20,8 @@ availability_courses : list[list[int]] = [[] for i in range(n)]
 """
 for classe in range(n):
     for prof in range(len(profs)) :
-        if nx.has_path(G, profs[prof], courses[classe]):
+        if (courses[classe], profs[prof]) in list(G.edges()):
             availability_courses[classe] = list(availabilityMatrix[prof])
-
 
 real_courses_names : dict = {}
 """Dictionnary with the corresponding names and indexs of the courses
@@ -31,6 +30,7 @@ real_courses_names : dict = {}
 for i in range(n):
     real_courses_names[index_courses[i]] = courses[i]
 
+print(real_courses_names)
 
 new_graph = nx.Graph()
 new_graph.add_nodes_from(index_courses)
@@ -43,7 +43,7 @@ for i in range(n):
 # Application des méthodes / Application of the methods :
 
 normalisation(new_graph)
-node_colors = greedy_coloring(new_graph, availability_courses, number_rooms = 5)
+node_colors = greedy_coloring(new_graph, availability_courses, number_rooms = 10)
 new_graph = nx.relabel_nodes(new_graph, real_courses_names)
 
 
