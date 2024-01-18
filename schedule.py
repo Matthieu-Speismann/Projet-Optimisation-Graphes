@@ -1,53 +1,66 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from creationGraphe import colorCoursesDict
+from generationBDD import parameters
 
-# Créer les données pour le tableau
-jours_semaine = ["", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"]
-creneaux_horaires = ["8h-9h", "9h-10h", "10h-11h", "11h-12h", "12h-13h", "13h-14h", "14h-15h", "15h-16h", "16h-17h"]
+print(parameters['slotsNumber'])
+if parameters['slotsNumber']%2 == 0:
+    nbrDays = parameters['slotsNumber'] // 2
+else: 
+    nbrDays = (parameters['slotsNumber'] // 2) + 1
+days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"]
+weekDays = [" "]
 
-# Créer la figure et les axes
+for i in range(nbrDays):
+    weekDays.append(days[i % 5])
+
+
 fig, ax = plt.subplots()
 
-# Cacher les axes
 ax.xaxis.set_visible(False)
 ax.yaxis.set_visible(False)
 ax.set_frame_on(False)
 
-# Ajouter les cellules au tableau
 cell_text = []
-for i, row in enumerate(creneaux_horaires):
-    if i == 4:  # Ligne 5 (index 4) correspondant à 12h-13h
-        cell_text.append([row] + ["Repas"] * 5)
+time = ["Matin", "Midi", "Après-midi"]
+for i, row in enumerate(time):
+    if i == 1:
+        cell_text.append([row] + ["Repas"] * nbrDays)
     else:
-        cell_text.append([row] + [""] * 5)  # Remplacer "Repas" par une chaîne vide pour les autres lignes
+        cell_text.append([row] + [""] * nbrDays)
 
-# Créer le tableau
-table = ax.table(cellText=cell_text, rowLabels=None, colLabels=jours_semaine, loc='center', cellLoc='center', colColours=["lightgray"] * 6)  # Utiliser le même gris pour les jours et les horaires
 
-# Ajuster le style du tableau
+table = ax.table(cellText=cell_text, rowLabels=None, colLabels=weekDays, loc='center', cellLoc='center',
+                 colColours=["lightgray"] * (nbrDays + 1))  # Utiliser le même gris pour les jours et les horaires
+
+
 table.auto_set_font_size(False)
 table.set_fontsize(10)
 table.scale(1, 2)
 
+for j in range(nbrDays + 1):
+    cell = table[1, j]
+    cell.set_height(0.2)
+
+    cell = table[3, j]
+    cell.set_height(0.2)
+
 i, j = 1, 1
 cnt = 0
 colors = list(colorCoursesDict.keys())
-while cnt != len(colors):
+while cnt < len(colors):
     cell = table[i, j]
     cell_text_obj = cell.get_text()
     cell_text_obj.set_text("\n".join(colorCoursesDict[colors[cnt]]))
     cell_text_obj.set_color(colors[cnt])  
-    if i == 4: #Repas
-        i += 2
-    elif i == 9:
+    if i == 3:
         i = 1
         j += 1
     else:
-        i += 1
+        i += 2
     cnt += 1
+    
+ax.annotate(f"Emploi du temps avec {parameters['studentNumber']} élèves, {parameters['profsNumber']} professeurs, {parameters['courseNumber']} matières et {parameters['slotsNumber']} créneaux disponibles.", xy=(0.5, 0.96), xycoords='axes fraction', ha='center')
+ax.annotate(f"Probabilité de {parameters['courseStudentProbability']} entre les élèves et les cours, et de {parameters['availabilityProbability']} sur la disponibilité des professeurs", xy=(0.5, 0.90), xycoords='axes fraction', ha='center')
 
-
-# print(colorCoursesDict)
-# Afficher le tableau
 plt.show()
